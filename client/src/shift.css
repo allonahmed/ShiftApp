@@ -1,0 +1,53 @@
+.shift-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    height: 200px;
+    background: rgb(190, 187, 187);
+    width: 40rem;
+    border: 2px solid black;
+    border-radius: 25px;
+    margin-bottom: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    
+}
+.card:first-child{
+    margin-top: 10px;;
+}
+
+button {
+    margin: 1px 10px;
+}
+button:hover{
+    cursor: pointer;
+    background: grey;
+    color: white;
+}
+.name{
+    background: grey;
+    width: 200px;
+    padding:10px 2px;
+    border-radius: 50px;
+    color: white;
+    text-transform: uppercase;
+    
+}
+
+.logout {
+    right: 0;
+    position: absolute;
+    padding: 10px 10px;
+    font-size: 25px;
+}
