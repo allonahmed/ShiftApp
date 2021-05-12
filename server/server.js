@@ -3,15 +3,44 @@ const app = express();
 // const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 // const cookieParser = require('cookie-parser');
 // const session = require('express-session');
 
+const Datastore = require('nedb');
+
+var blog = new Datastore({ filename: 'database/blog.db', autoload: true });
+//username
+//comment
+//time 
+
+var users = new Datastore({ filename: 'database/users.db', autoload: true , corruptAlertThreshold: 1});
+//username
+//password <- encrypted
+//usertype [e,m,g]
+
+
+var loggedin = new Datastore({ filename: 'database/loggedin.db', autoload: true });
+//username
+//password <- encrypted
+//usertype [e,m,g]
+
+var shifts = new Datastore({ filename: 'database/shifts.db', autoload: true });
+//username
+//shiftstart
+//shift end
+//date 
+//comment  --null
+//status   [cover(nobody took it yet),pending(some1 took it),approved]
+
+//this is for before we immplement cookies
+var currenUser={};
+
+
+
 app.use(express.json());
 
-
 app.use(express.urlencoded());
-
 
 const corsOptions ={
     origin:'http://localhost:3000', 
@@ -22,69 +51,54 @@ app.use(cors(corsOptions));
 
 
 
-
-var db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password', 
-    database: 'logindb',
-    port: '3306'
-});
-
-const manager = (arr, gm, username) => {
-    let type = "Employee";
-    if (gm === username)
-    {
-        type = "General Manager"
-    }
-    for(let i = 0; i < arr.length; i ++ ) 
-    {
-        if ( arr[i] === username)
-        {
-            type = "Manager";
-        }
-    }
-    return type;
-}
-
 const managerList = ["allonahmed", "andrewbristow", "kanyewest"];
 const general = "elonmusk";
 
 let hashedPass ='';
 app.post('/register/', (req, res)=> {
-
-        hashedPass = bcrypt.hashSync(req.body.password, 10);
+        // hashedPass = bcrypt.hashSync(req.body.password, 10);
+        hashedPass = req.body.password;
         const username1= req.body.username;
         const password1 = req.body.password;
         console.log(username1,password1);
         const type = "Employee"
-        db.query("INSERT INTO logindb.users (username, password, usertype) VALUES (?,?,?)", [username1, password1, type], (err, result) =>{
-            if (err) 
-            {
-                console.log(err);
-                res.send({message: "Username taken!"})
-            }    
-            else {
-                console.log(result);
-                res.send({username: username1, password: password1, hashedpassword: hashedPass, usertype: type});
-                
+        users.findOne({username:username1},function(error,doc){
+            if(doc){res.send("username already exist")}
+            else{
+                adduser(username1,hashedPass)
             }
+
         });
-
+        
 });
-
-app.get('/get/', (req,res) => {
-    db.query("SELECT * FROM shifts", (err, results)=> {
-        if(err) console.log(err);
-        else res.send(results)    
-    })
+function adduser(un,hashed,ut= 'employee'){
+    newuser = {
+        username: un,
+        password: hashed,
+        usertype: ut
+    }
+    users.insert(newuser,function(err, docs) {
+        console.log('Saved user:', docs.username);
+    });
+}
+app.get('/get-shifts/', (req,res) => {
+    shifts.find({}, function (err, docs) {
+        if(docs){
+            res.send(docs)
+        }
+    });
 })
 
 app.get('/get/login/', (req,res) => {
-    db.query("SELECT * FROM logindb.loggedin", (err,result) => {
-        if (err) console.log(err);
-        else res.send(result);        
-    })
+    if(currenUser)
+    res.send(currenUser)
+    else{
+        res.send({
+            username:"allon",
+            password:"1221",
+            usertype:"employee"
+        })
+    }
 })
 
 // app.get('/login', (req, res) => {
@@ -97,11 +111,8 @@ app.get('/get/login/', (req,res) => {
 // })
 
 app.post('/login/',(req,res)=>{
-    const username3 = req.body.username;
-    const password3 = req.body.password;
-    console.log(username3, password3);
-    
-
+    const username = req.body.username;
+    const password = req.body.password;
     // const vp = bcrypt.compareSync(hashedPass, password3);
     // console.log(typeof vp);
     // if(vp===false)
@@ -110,98 +121,90 @@ app.post('/login/',(req,res)=>{
     // }
     
     //  if(password3 && username3){
-        db.query("SELECT * FROM logindb.users WHERE username = ? AND password = ?", [username3, password3], (error, result) =>{
-            if (result.length > 0) 
-            {
-                res.send(result);
-                console.log(result); 
-            }
-            else {
-                res.send({message: "Invalid Username/Password!"});
-                console.log(error);
-            }
 
-            
-        })
-    // }
-    const man = manager(managerList, general, username3) ;
-    db.query( "DELETE FROM logindb.loggedin", (err2,res2)=> {
-        if (err2) console.log(err2);
-    })
-    db.query(" INSERT INTO logindb.loggedin (username, password, usertype) VALUES (?,?,?);", [username3, password3, man], (err1, result1) => {
-        if (err1){
-            console.log({err1: err});
+    users.findOne({username:username},function(error,user){
+        if(user && password == user.password){
+            currenUser = user;
+            console.log(user)
+            res.send(user)
+        }else{
+            res.send({message: "Invalid Username/Password!"});
         }
     })
+       
+    
 })
 
 // response.redirect('/home');
 
 
 app.post('/postForm/', (req,res) => {
-    const shiftstart = req.body.shiftstart;
-    const shiftend = req.body.shiftend;
-    const date = req.body.date;
-    const comments = req.body.comments;
-    const user = req.body.username;
-
-    // db.query("Select")
-    db.query("INSERT INTO shifts (username, shiftstart, shiftend, date, comments, status) VALUES (?,?,?,?,?,?)", [user, shiftstart, shiftend, date, comments, "cover"], (err, results) => {
-        if (err) console.log(err);
-        else res.send(results);
-    })
-})
-
-app.post('/postForm/cover', (req,res)=> {
-    const shiftstart = req.body.shiftstart;
-    const shiftend = req.body.shiftend;
-    const date = req.body.date;
-    const comments = req.body.comments;
-    const user = req.body.username;
-    const cover = req.body.cover;
-
-    db.query("UPDATE logindb.shifts SET status = ? where username = ? and shiftstart = ? and shiftend = ? and date = ?", [cover, user, shiftstart, shiftend, date], (err,results)=> {
-        if (err) console.log(err);
-        else {
-            res.send(results);
-            console.log(results);
-            
+    let newshift = {
+        username : req.body.username,
+        shiftstart : req.body.shiftstart,
+        shiftend:req.body.shiftend,
+        date : req.body.date,
+        comment : req.body.comment,
+        status: "cover"
+    }
+    shifts.insert(newshift,function(err,shift){
+        if(shift){
+            console.log("shiftadded: ",shift)
+            res.send(shift)
         }
-        
-    })
+    });
+
 })
+
+app.post('/update-shift-cover', (req,res)=> {
+    
+    let newshift = {
+        username : req.body.username,
+        shiftstart : req.body.shiftstart,
+        shiftend:req.body.shiftend,
+        date : req.body.date,
+    }
+    updatecover(newshift,req.body.cover)
+    res.sendStatus(200)
+})
+
+function updatecover(basedata,newcover){
+    shifts.findOne(basedata,function(error,doc){
+       doc["status"]= newcover
+       shifts.remove(basedata)
+       shifts.insert(doc)
+       console.log(doc)
+    });
+}
+
+
 
 app.get('/get/users', (req,res)=>{
-    const selectAll = "SELECT * from users";
-    db.query(selectAll, (err, results)=>{
-        if (err) console.log(err + "errorororororo");
-        else res.send(results);
+    users.find({},function(err,users){
+        res.send(users)
     })
 })
 
 app.post('/chat', (req,res)=> {
-    const username = req.body.username;
-    const comment = req.body.comment;
-    const time = req.body.time;
-    const type = req.body.usertype
-
-    db.query('INSERT INTO logindb.blog (username, comment, time, usertype) VALUES (?,?,?,?)', [username,comment,time, type],(err, result)=> {
-        if (err) console.log(err);
-        else {
-            console.log(result);
-            res.send(result);
-        }
-        
-    })
+    let newblog = {
+        username : req.body.username,
+        comment: req.body.comment,
+        time : req.body.time,
+        type : req.body.usertype
+    }
+    blog.insert(newblog)
+    res.sendStatus(200)
 })
 
 app.get('/chatget', (req,res)=> {
-    db.query("SELECT * FROM logindb.blog", (err,result)=> {
-        if (err) console.log(err);
-        else res.send(result);
+    blog.find({},function(err,chat){
+        res.send(chat)
     })
 })
 
 app.listen (3001, ()=> {
     console.log("server running on port 3001");
 })
+
+
+

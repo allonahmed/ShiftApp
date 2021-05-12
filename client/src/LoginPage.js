@@ -36,21 +36,22 @@ function Main() {
           
         }
         else {    
-          setType(resp.data[0].usertype);
-          console.log(type);
-          if (resp.data[0].username === username && resp.data[0].password === password){
-            setLoginStatus("welcome back, " + resp.data[0].username);
+          console.log(resp.data);
+          setType(resp.data.usertype);
+          
+          if (resp.data.username === username && resp.data.password === password){
+            setLoginStatus("welcome back, " + resp.data.username);
             setLoggedIn(true);
-            setName(resp.data[0].username); 
+            setName(resp.data.username); 
           }
-          else if (resp.data[0].username === username && resp.data[0].password !== password)
+          else if (resp.data.username === username && resp.data.password !== password)
           {
             setInvalid(countInvalid+1);
             setLoginStatus("Invalid Username/Password, " + (5 -countInvalid) + ' login attempts left!');
             setLoggedIn(false);
 
           }
-          else if (resp.data[0].username !== username && resp.data[0].password === password)
+          else if (resp.data.username !== username && resp.data.password === password)
           {
             setInvalid(countInvalid+1);
             setLoginStatus("Invalid Username/Password, " + (5 -countInvalid) + ' login attempts left!');

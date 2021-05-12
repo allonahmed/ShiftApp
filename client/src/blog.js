@@ -21,8 +21,8 @@ class Blog extends React.Component {
     componentDidMount(){
         axios.get('http://localhost:3001/get/login').then((resp) => {
             this.setState(state=>({
-                name: resp.data[0].username,
-                type: resp.data[0].usertype,
+                name: resp.data.username,
+                type: resp.data.usertype,
             }))            
              
         })
