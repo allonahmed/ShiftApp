@@ -146,17 +146,59 @@ app.post('/postForm/', (req,res) => {
     const user = req.body.username;
 
     // db.query("Select")
-    db.query("INSERT INTO shifts (username, shiftstart, shiftend, date, comments) VALUES (?,?,?,?,?)", [user, shiftstart, shiftend, date, comments], (err, results) => {
+    db.query("INSERT INTO shifts (username, shiftstart, shiftend, date, comments, status) VALUES (?,?,?,?,?,?)", [user, shiftstart, shiftend, date, comments, "cover"], (err, results) => {
         if (err) console.log(err);
         else res.send(results);
     })
 })
 
-app.get('/get', (req,res)=>{
+app.post('/postForm/cover', (req,res)=> {
+    const shiftstart = req.body.shiftstart;
+    const shiftend = req.body.shiftend;
+    const date = req.body.date;
+    const comments = req.body.comments;
+    const user = req.body.username;
+    const cover = req.body.cover;
+
+    db.query("UPDATE logindb.shifts SET status = ? where username = ? and shiftstart = ? and shiftend = ? and date = ?", [cover, user, shiftstart, shiftend, date], (err,results)=> {
+        if (err) console.log(err);
+        else {
+            res.send(results);
+            console.log(results);
+            
+        }
+        
+    })
+})
+
+app.get('/get/users', (req,res)=>{
     const selectAll = "SELECT * from users";
     db.query(selectAll, (err, results)=>{
         if (err) console.log(err + "errorororororo");
+        else res.send(results);
+    })
+})
+
+app.post('/chat', (req,res)=> {
+    const username = req.body.username;
+    const comment = req.body.comment;
+    const time = req.body.time;
+    const type = req.body.usertype
+
+    db.query('INSERT INTO logindb.blog (username, comment, time, usertype) VALUES (?,?,?,?)', [username,comment,time, type],(err, result)=> {
+        if (err) console.log(err);
+        else {
+            console.log(result);
+            res.send(result);
+        }
         
+    })
+})
+
+app.get('/chatget', (req,res)=> {
+    db.query("SELECT * FROM logindb.blog", (err,result)=> {
+        if (err) console.log(err);
+        else res.send(result);
     })
 })
 

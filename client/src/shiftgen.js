@@ -2,7 +2,7 @@
 import React, {useState, useEffect} from 'react';
 import './App.css'
 // import CreatePost from './CreatePost';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 
 
@@ -24,6 +24,7 @@ class  Shiftgen extends React.Component{
             name: props.Name,
             nn: '',
             ut: '',
+            newPost: '',
         }
     }
     componentWillMount() {
@@ -65,6 +66,7 @@ class  Shiftgen extends React.Component{
                     username: this.state.nn,
                 },
                 clicked: true,
+                newPost: true,
             }))
         }
 
@@ -109,13 +111,18 @@ class  Shiftgen extends React.Component{
         render () {
             // console.log(this.state.name);
         return ( 
-            <div className= 'shift-container'>
-                  <h3>This is the GENERAL Manager Page, where you can approve, delete and comment on your employee's shift posts! You can also see what your managers are doing as well!</h3>
+            <div className= 'shift-container' >
+                  
+                  <div className='intro-but'>  
+                  <Link to = '/chat'><button className='logout'>Team Chat</button></Link>
+            <Link to='/roster'> <button className='logout'>View my Employee Roster</button></Link>
                 <Link to='/' ><button className='logout'>logout</button></Link>
+                </div>
+                <h3>This is the GENERAL Manager Page, where you can approve, delete and comment on your employee's shift posts! You can also see what your managers are doing as well!</h3>
                 <h2>Hey, ({this.state.ut}) {this.state.nn } Welcome to allon's shift app!</h2>
                 <div className='button-div'>
-                    <button className='button-pick'onClick={this.PostClick}> Post new shift </button>
-                    <button className='button-pick'onClick={this.PickClick}> Pick up shift</button>
+                    {/* <button className='button-pick'onClick={this.PostClick}> Post new shift </button> */}
+                    <button className='button-pick'onClick={this.PickClick}> View All Team Member Shifts</button>
                  </div>
                  {
                     !this.state.clicked 
@@ -154,6 +161,7 @@ class  Shiftgen extends React.Component{
                             <label>Comments</label>
                             <input className='comment' type="text" onChange={(e) => this.setComments(e)}/>
                             <button onClick={this.postShift} style={{marginTop: '15px'}}>Post Shift</button>
+                            {this.state.newPost ? <Redirect to="/shift"/> : null }
                         </div>
                  }
             </div>

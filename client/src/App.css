@@ -42,3 +42,73 @@ input {
 .comment{
   height: 100px;
 }
+.roster-card {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 15px;
+
+
+}
+
+span {
+  margin-right: 10px;
+  text-align: center;
+}
+
+
+
+.blog-card {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(209, 203, 203);
+  margin-bottom: 10px;
+  width: 80%;
+  border-radius: 50px;
+}
+.blog-card h3 {
+  text-align: center;
+  border-bottom: 2px solid black;
+  margin-top: 1px;
+  width: 60%;
+  margin: auto auto;
+}
+
+.cont {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-direction: column;
+
+}
+
+.blog-card p {
+  /* border-bottom: 2px dotted black; */
+  height: 60px;
+  text-align: center;
+  width: 100%;
+  border-radius: 25px;
+  background: rgb(218, 214, 214);
+  margin: auto auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.blog-card time {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 29px;
+  margin-bottom: 3px;
+  border-top: 1px solid black;
+  width: 95%;
+  margin: auto auto;
+  height: 20px;
+  padding: 2px 2px;
+  
+}
+
+.logout1 {
+  right:0;
+  position: absolute;
+}

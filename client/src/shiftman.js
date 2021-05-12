@@ -2,7 +2,7 @@
 import React, {useState, useEffect} from 'react'; 
 import './App.css'
 // import CreatePost from './CreatePost';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 
 
@@ -24,6 +24,7 @@ class  Shiftman extends React.Component{
             name: props.Name,
             nn: '',
             ut: '',
+            newPost: '',
         }
     }
     componentWillMount() {
@@ -57,14 +58,15 @@ class  Shiftman extends React.Component{
             })
             
             this.setState(state=>({
-                listCards: [{
-                    shiftstart: this.state.startTime,
-                    shiftend:  this.state.endTime,
-                    date: this.state.shiftDate,
-                    comments: this.state.comments,
-                    username: this.state.nn,
-                }],
+                // listCards: [{
+                //     shiftstart: this.state.startTime,
+                //     shiftend:  this.state.endTime,
+                //     date: this.state.shiftDate,
+                //     comments: this.state.comments,
+                //     username: this.state.nn,
+                // }],
                 clicked: false,
+                newPost: true,
             }))
         }
 
@@ -109,8 +111,12 @@ class  Shiftman extends React.Component{
         render () {
             // console.log(this.state.name);
         return ( 
-            <div className= 'shift-container'>    
+            <div className= 'shift-container'>  
+            <div className='intro-but'>  
+            <Link to = '/chat'><button className='logout'>Team Chat</button></Link>
+            <Link to='/roster'> <button className='logout'>View my Employee Roster</button></Link>
                 <Link to='/' ><button className='logout'>logout</button></Link>
+                </div>
                 <h2>Hey, ({this.state.ut}) {this.state.nn } Welcome to allon's shift app!</h2>
                 <h3>This is the Manager Page, where you can approve, delete and comment on your employee's shift posts!</h3>
                 <div className='button-div'>
@@ -145,7 +151,7 @@ class  Shiftman extends React.Component{
                             <h3> Enter your shift information to post to your co-workers!</h3>
                             {/* <label>full name</label>
                             <input required type="text" placeholder="full name..." onChange = {(e) => setName(e.target.value)}/> */}
-                            <label>Shift date </label>
+                            <label >Shift date </label>
                             <input required type="date" onChange={(e) => this.setShiftDate(e)}/>
                             <label>Start time </label>
                             <input required type="time" onChange={(e) => this.setStartTime(e)}/>
@@ -154,6 +160,7 @@ class  Shiftman extends React.Component{
                             <label>Comments</label>
                             <input className='comment' type="text" onChange={(e) => this.setComments(e)}/>
                             <button onClick={this.postShift} style={{marginTop: '15px'}}>Post Shift</button>
+                            {this.state.newPost ? <Redirect to="/shift"/> : null }
                         </div>
                  }
             </div>

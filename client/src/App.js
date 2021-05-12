@@ -7,6 +7,8 @@ import SignUpPage from './SignUpPage'
 import Shift from './shift.js'
 import Shiftgen from './shiftgen';
 import Shiftman from './shiftman';
+import Roster from './roster';
+import Blog from './blog.js';
 
 class App extends React.Component {
     render() {
@@ -19,6 +21,8 @@ class App extends React.Component {
                     <Route path='/shift' component={Shift} />
                     <Route path='/shiftman' component={Shiftman} />
                     <Route path='/shiftgen' component={Shiftgen} />
+                    <Route path='/roster' component={Roster} />
+                    <Route path='/chat' component={Blog} />
                 </Switch>
             </BrowserRouter>
         )

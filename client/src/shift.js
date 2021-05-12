@@ -26,6 +26,7 @@ class  Shift extends React.Component{
             ut: '',
             newPost: false,
             cover:"cover",
+            notDone:"",
         }
     }
     // eslint-disable-next-line
@@ -47,30 +48,48 @@ class  Shift extends React.Component{
                
           })
     }
+    
+
 
 
         postShift = () => {   
-            axios.post("http://localhost:3001/postForm/", {
-                shiftstart: this.state.startTime,
-                shiftend:  this.state.endTime,
-                date: this.state.shiftDate,
-                comments: this.state.comments,
-                username: this.state.nn,
-            }).then((resp) => {
-            
-            
-            this.setState(state=>({
-                listCards: {
+            if(this.state.shiftDate.length === 0 || this.state.startTime.length===0 || this.state.endTime.length === 0)
+            {
+                this.setState(state=>({
+                    notDone: "Complete all required fields before posting!"
+                }))
+            }
+            else {
+                axios.post("http://localhost:3001/postForm/", {
                     shiftstart: this.state.startTime,
                     shiftend:  this.state.endTime,
                     date: this.state.shiftDate,
                     comments: this.state.comments,
-                    username: this.state.name,
-                },
-                clicked: false,
-                newPost: true,
-            }))
-        })
+                    username: this.state.nn,
+                    cover: this.state.cover,
+                }).then((resp) => {
+                    axios.get('http://localhost:3001/get').then((response)=>{
+                        this.setState(state=>({
+                            listCards: response.data,
+                        }))
+                                    
+                    })
+                
+                
+                this.setState(state=>({
+                    listCards: [...this.state.listCards,{
+                        shiftstart: this.state.startTime,
+                        shiftend:  this.state.endTime,
+                        date: this.state.shiftDate,
+                        comments: this.state.comments,
+                        username: this.state.name,
+                        cover: this.state.cover,
+                    }],
+                    clicked: false,
+                    newPost: true,
+                }))
+            })
+        }
         }
 
 
@@ -112,37 +131,40 @@ class  Shift extends React.Component{
         };
 
         
-        // console.log(nn);
         render () {
-            // console.log(this.state.name);
 
             const styleCover = {
                 display:"none",
             }
-            const Card = (props) => {
-                return (
-                    <div className ="card" >
-                    <span>{this.dateChange(props.date)}</span>
-                    <span>{props.shiftstart} - {props.shiftend}</span>
-                    <span className='name'>{props.username}</span>
-                    <span>comments: {props.comments}</span>
-                    <button style={this.state.nn === props.username ? styleCover: null} onClick={clickCover}>{this.state.cover}</button>
-                    <button style={ this.state.nn === props.username ? null: { display:"none" } }>delete</button>
-                </div>
-                )
+            const ClickCover = (username, start, end, date) => {
+
+                axios.put("http://localhost:3001/postForm/cover/", {
+                    shiftstart: start,
+                    shiftend:  end,
+                    date: date,
+                    username: username,
+                    cover: "pending shift for " + this.state.nn,
+                }).then((resp) => {
+                    axios.get('http://localhost:3001/get').then((re) => {
+                        this.setState(state=>({
+                            listCards: re.data,
+                        }))
+                    })
+                })
+            
             }
-            const clickCover = () => {
-                this.setState(state=>({
-                    cover: "pending manager approval ✅"
-                }))
-            }
-            const List  = this.state.listCards.map((val,i) => (
-                <Card key={i}  date = {val.date} shiftstart= {val.shiftstart} shiftend={val.shiftend} username={val.username} comments={val.comments}/>
-            ))
+            
+        
+
         return ( 
             <div className= 'shift-container'>
                 
+                <div className='intro-but'>  
+            <Link to = '/chat'><button className='logout'>Team Chat</button></Link>
+
                 <Link to='/' ><button className='logout'>logout</button></Link>
+                </div>
+     
                 <h2>Hey, ({this.state.ut}) {this.state.nn } Welcome to allon's shift app!</h2>
                 <div className='button-div'>
                     <button className='button-pick'onClick={this.PostClick}> Post new shift </button>
@@ -151,27 +173,40 @@ class  Shift extends React.Component{
                  {
                     this.state.clicked === false
                     ?
-                        <div>
-                            {
-                                List
-                            }
-                        </div>
+                    <div>
+                    {
+                        this.state.listCards.slice(0).reverse().map((val,i) => {
+                            return (
+                                <div className ="card" key={i}>
+                                    <span>{this.dateChange(val.date)}</span>
+                                    <span>{val.shiftstart} - {val.shiftend}</span>
+                                    <span className='name'>{val.username}</span>
+                                    <span><input style={{fontSize:"14px", borderRadius: "15px"}}placeholder={"comments:  " + val.comments}/></span>
+                                    <button style={this.state.nn === val.username ? styleCover: null} onClick={ClickCover(val.username,val.shiftstart, val.shiftend, val.date,this.state.cover)}>{val.status}</button>
+                                    <button style={ this.state.nn === val.username ? null: { display:"none" } }>delete</button>
+                                    
+                                </div>
+                            )
+                        })
+                    }
+                </div>
 
                     :   
                         <div className= 'create-post'>
                             <h3> Enter your shift information to post to your co-workers!</h3>
+                            {this.state.notDone.length===0 ? null : this.state.notDone}
                             {/* <label>full name</label>
                             <input required type="text" placeholder="full name..." onChange = {(e) => setName(e.target.value)}/> */}
-                            <label>Shift date </label>
+                            <label style={this.state.notDone!==0?{color: "red"}:{color:"black"}}>Shift date </label>
                             <input required type="date" onChange={(e) => this.setShiftDate(e)}/>
-                            <label>Start time </label>
+                            <label style={this.state.notDone!==0?{color: "red"}:{color:"black"}}>Start time </label>
                             <input required type="time" onChange={(e) => this.setStartTime(e)}/>
-                            <label>End time</label>
+                            <label style={this.state.notDone!==0?{color: "red"}:{color:"black"}}>End time</label>
                             <input required type="time" onChange={(e) => this.setEndTime(e)}/> 
-                            <label>Comments</label>
+                            <label >Comments</label>
                             <input className='comment' type="text" onChange={(e) => this.setComments(e)}/>
                             <button onClick={this.postShift} style={{marginTop: '15px'}}>Post Shift</button>
-                            {this.state.newPost ? <Redirect to="/shift.js"/> : null }
+                            {this.state.newPost ? <Redirect to="/shift"/> : null }
                         </div>
                  }
             </div>

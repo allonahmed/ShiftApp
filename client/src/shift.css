@@ -45,9 +45,15 @@ button:hover{
     
 }
 
+.intro-but{
+    display:flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
 .logout {
-    right: 0;
-    position: absolute;
+    margin-left:1px;
     padding: 10px 10px;
     font-size: 25px;
+    border-radius: 50px;
 }
